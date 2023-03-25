@@ -7,7 +7,10 @@
  */
 package edu.neu.coe.info6205.union_find;
 
+import edu.neu.coe.info6205.util.QuickRandom;
+
 import java.util.Arrays;
+import java.util.Random;
 
 /**
  * Height-weighted Quick Union with Path Compression
@@ -81,7 +84,12 @@ public class UF_HWQUPC implements UF {
     public int find(int p) {
         validate(p);
         int root = p;
-        // FIXME
+        while(root!=getParent(root)){
+            if(pathCompression){
+                doPathCompression(root);
+            }
+            root = getParent(root);
+        }
         // END 
         return root;
     }
@@ -169,15 +177,43 @@ public class UF_HWQUPC implements UF {
     private boolean pathCompression;
 
     private void mergeComponents(int i, int j) {
-        // FIXME make shorter root point to taller one
-        // END 
+        if(height[i]< height[j]){
+            parent[i] = j;
+        }
+        else{
+            parent[j] = i;
+            if(height[i] == height[j]){
+                height[i]+=1;
+            }
+        }
     }
 
     /**
      * This implements the single-pass path-halving mechanism of path compression
      */
     private void doPathCompression(int i) {
-        // FIXME update parent to value of grandparent
-        // END 
+        parent[i] = getParent(parent[i]);
+    }
+
+    public static void main(String[] args) {
+        for(int i=1;i<=10000000;i*=10){
+            int totalObjects = i;
+            long totalPairs = 0;
+            for(int k=0;k<100;k++){
+                UF_HWQUPC uf = new UF_HWQUPC(totalObjects, true);
+                Random rand = new Random();
+                int upperbound = totalObjects;
+                int m = 0;
+                while(uf.count>1){
+                    int rand1 = rand.nextInt(upperbound);
+                    int rand2 = rand.nextInt(upperbound);
+                    uf.connect(rand1, rand2);
+                    m++;
+                }
+                totalPairs+=m;
+            }
+            totalPairs = totalPairs/100;
+            System.out.println("Value of (total objects) n: "+ Integer.toString(totalObjects)+ " " +"Value of (pairs) m "+ Long.toString(totalPairs));
+        }
     }
 }
